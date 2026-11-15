@@ -9,13 +9,23 @@ class Tabela:
         self.dados_por_coluna: list[list[Any]] = linha_para_coluna(self.dados)
 
     def somar_coluna_numerica(self, nome_cabecalho: str) -> float | int:
+        '''Recebe o nome de um cabeçalho, soma todos os valores da coluna dele e retorna este valor.\n
+        **Retorna *False* caso algum valor não seja um int ou float (como list, str, bool etc.)**'''
         indice_coluna: int = self.cabecalhos.index(nome_cabecalho)
         soma: float | int = 0
         for valor in self.dados_por_coluna[indice_coluna]:
+            tipo_valor = str(type(valor))
+            if tipo_valor != "<class 'int'>" and tipo_valor != "<class 'float'>":
+                return False
             soma += valor
         return soma
 
-    def pegar_tabela(self, tipo_de_dado = 'list') -> list[list[any]] | list[dict]:
+    def pegar_tabela(self, tipo_de_dado: str = 'list') -> list[list[any]] | list[dict] | list[tuple]:
+        '''Retorna a tabela total em diferentes tipos de dado, pode ser mudado alterando o parâmetro tipo_de_dado para:
+        - **'list'**: Padrão de chamada, retorna a matriz bidimensional com os cabeçalhos.
+        - **'dict'**: Retorna uma lista de dicionários, com a chave sendo igual a o cabeçalho da coluna.
+        - **'tuple'**: Retorna uma lista de tuplas, útil para desempacotamento, cada tupla tem os valores de uma lista.'''
+        base_de_dados: list = []
         match tipo_de_dado:
             case 'list':
                 base_de_dados = [self.cabecalhos].extend(self.dados)
@@ -25,6 +35,9 @@ class Tabela:
                     dicio = dict()
                     dicio.update(zip(self.cabecalhos, linha))
                     base_de_dados.append(dicio)
+            case 'tuple':
+                for linha in self.dados:
+                    base_de_dados.append(tuple(linha))
         return base_de_dados
 
 
@@ -33,10 +46,10 @@ class Tabela:
         cantos, conectores, linhas = obter_caracteres(tipo_borda)
 
         if not cantos or not conectores or not linhas:
-            linha_valores: str = '\033[1m   '.join(f'{str(v):^{larguras[i]}}' for i, v in enumerate(self.cabecalhos))
+            linha_valores: str = '\033[1m'.join(f'{str(v):^{larguras[i]}}' for i, v in enumerate(self.cabecalhos))
             print(linha_valores, '\033[0m')
             for linha in self.dados:
-                linha_valores: str = '  '.join(f'{str(v):<{larguras[i]}}' for i, v in enumerate(linha))
+                linha_valores: str = ''.join(f'{str(v):<{larguras[i]}}' for i, v in enumerate(linha))
                 print(linha_valores)
             return
 
