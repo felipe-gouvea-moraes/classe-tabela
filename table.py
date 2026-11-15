@@ -1,5 +1,4 @@
 from typing import Any
-import random
 
 class Tabela:
     def __init__(self, cabecalhos: list[str], dados: list[list[Any]]) -> None:
