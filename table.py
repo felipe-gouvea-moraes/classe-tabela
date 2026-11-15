@@ -8,7 +8,7 @@ class Tabela:
         self.colunas: int = len(self.dados[0]) if self.dados else 0
         self.dados_por_coluna: list[list[Any]] = linha_para_coluna(self.dados)
 
-    def somar_coluna(self, nome_cabecalho: str) -> float | int:
+    def somar_coluna_numerica(self, nome_cabecalho: str) -> float | int:
         indice_coluna: int = self.cabecalhos.index(nome_cabecalho)
         soma: float | int = 0
         for valor in self.dados_por_coluna[indice_coluna]:
@@ -28,11 +28,13 @@ class Tabela:
         return base_de_dados
 
 
-    def renderizar_tabela(self, tipo_borda: str = 'none') -> None:
+    def renderizar_tabela(self, tipo_borda: str = 'none', fundo_cabecalhos=' ') -> None:
         larguras: list[int] = largura_por_coluna(self.dados_por_coluna, self.cabecalhos)
         cantos, conectores, linhas = obter_caracteres(tipo_borda)
 
         if not cantos or not conectores or not linhas:
+            linha_valores: str = '\033[1m   '.join(f'{str(v):^{larguras[i]}}' for i, v in enumerate(self.cabecalhos))
+            print(linha_valores, '\033[0m')
             for linha in self.dados:
                 linha_valores: str = '  '.join(f'{str(v):<{larguras[i]}}' for i, v in enumerate(linha))
                 print(linha_valores)
@@ -43,6 +45,14 @@ class Tabela:
         
         texto_por_linha.append(texto_por_bordas[0])
         
+        linha_cabecalhos = linhas[1]
+        for id_coluna, cabecalho in enumerate(self.cabecalhos):
+            linha_cabecalhos += f'{str(cabecalho):{fundo_cabecalhos}^{larguras[id_coluna]}}'
+            linha_cabecalhos += linhas [1]
+
+        texto_por_linha.append(linha_cabecalhos)
+        texto_por_linha.append(texto_por_bordas[1])
+
         for id_linha, linha in enumerate(self.dados):
             linha_valores = linhas[1]
             
@@ -140,17 +150,3 @@ def largura_por_coluna(dados_coluna: list[list[Any]], cabecalhos: list[str]) -> 
                 maior_largura = len(str(valor))
         larguras.append(maior_largura)
     return larguras
-
-
-if __name__ == "__main__":
-    cabecalhos = ["ID", "Nome", "Valor"]
-    dados = [
-        [1, "Produto A", 150.50],
-        [2, "Produto B com nome longo", 320.00],
-        [3, "Produto C", 99.90]
-    ]
-
-    tabela = Tabela(cabecalhos, dados)
-    tabela_em_dicio = tabela.pegar_tabela(tipo_de_dado='dict')
-    
-    tabela.renderizar_tabela(tipo_borda='basic')
